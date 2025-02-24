@@ -70,7 +70,7 @@ def getcpunr():
     return cpunr
 
 def avg(it_list):
-    return sum(it_list)/len(it_list)
+    return sum(it_list)/len(it_list) if len(it_list) else 0
 
 def format_bytes(s):
     size = float(s)
@@ -758,15 +758,15 @@ def display_cputop_lines(it_line, i):
         it_stat_guest_nice = float(it_line[str(it_device) + '_11'])
 
         it_stat_cpu_times = it_stat_user +it_stat_nice +it_stat_system +it_stat_idle +it_stat_iowait +it_stat_irq +it_stat_softirq +it_stat_steal
-        it_cpu_user  = 100 * it_stat_user    / it_stat_cpu_times
-        it_cpu_sys   = 100 * it_stat_system  / it_stat_cpu_times
-        it_cpu_wait  = 100 * it_stat_iowait  / it_stat_cpu_times
-        it_cpu_hirq  = 100 * it_stat_irq     / it_stat_cpu_times
-        it_cpu_sirq  = 100 * it_stat_softirq / it_stat_cpu_times
-        it_cpu_idle  = 100 * it_stat_idle    / it_stat_cpu_times
-        it_cpu_steal = 100 * it_stat_steal   / it_stat_cpu_times
-        it_cpu_guest = 100 * it_stat_guest   / it_stat_cpu_times
-        it_cpu_util  = 100 * (it_stat_cpu_times - it_stat_idle - it_stat_iowait - it_stat_steal) / it_stat_cpu_times
+        it_cpu_user  = 100 * it_stat_user    / it_stat_cpu_times if it_stat_cpu_times else 0
+        it_cpu_sys   = 100 * it_stat_system  / it_stat_cpu_times if it_stat_cpu_times else 0
+        it_cpu_wait  = 100 * it_stat_iowait  / it_stat_cpu_times if it_stat_cpu_times else 0
+        it_cpu_hirq  = 100 * it_stat_irq     / it_stat_cpu_times if it_stat_cpu_times else 0
+        it_cpu_sirq  = 100 * it_stat_softirq / it_stat_cpu_times if it_stat_cpu_times else 0
+        it_cpu_idle  = 100 * it_stat_idle    / it_stat_cpu_times if it_stat_cpu_times else 0
+        it_cpu_steal = 100 * it_stat_steal   / it_stat_cpu_times if it_stat_cpu_times else 0
+        it_cpu_guest = 100 * it_stat_guest   / it_stat_cpu_times if it_stat_cpu_times else 0
+        it_cpu_util  = 100 * (it_stat_cpu_times - it_stat_idle - it_stat_iowait - it_stat_steal) / it_stat_cpu_times if it_stat_cpu_times else 0
 
         if opts.sort == "user":
             new_line[str(it_device) + "_" + opts.sort] = it_cpu_user
@@ -1408,15 +1408,15 @@ def display_lines(it_line, i, agregates = {}):
             it_stat_guest_nice = float(it_line[it_device+'_stat_11'])
 
             it_stat_cpu_times = it_stat_user +it_stat_nice +it_stat_system +it_stat_idle +it_stat_iowait +it_stat_irq +it_stat_softirq +it_stat_steal
-            it_cpu_user  = 100 * it_stat_user    / it_stat_cpu_times
-            it_cpu_sys   = 100 * it_stat_system  / it_stat_cpu_times
-            it_cpu_wait  = 100 * it_stat_iowait  / it_stat_cpu_times
-            it_cpu_hirq  = 100 * it_stat_irq     / it_stat_cpu_times
-            it_cpu_sirq  = 100 * it_stat_softirq / it_stat_cpu_times
-            it_cpu_idle  = 100 * it_stat_idle    / it_stat_cpu_times
-            it_cpu_steal = 100 * it_stat_steal   / it_stat_cpu_times
-            it_cpu_guest = 100 * it_stat_guest   / it_stat_cpu_times
-            it_cpu_util  = 100 * (it_stat_cpu_times - it_stat_idle - it_stat_iowait - it_stat_steal) / it_stat_cpu_times
+            it_cpu_user  = 100 * it_stat_user    / it_stat_cpu_times if it_stat_cpu_times else 0
+            it_cpu_sys   = 100 * it_stat_system  / it_stat_cpu_times if it_stat_cpu_times else 0
+            it_cpu_wait  = 100 * it_stat_iowait  / it_stat_cpu_times if it_stat_cpu_times else 0
+            it_cpu_hirq  = 100 * it_stat_irq     / it_stat_cpu_times if it_stat_cpu_times else 0
+            it_cpu_sirq  = 100 * it_stat_softirq / it_stat_cpu_times if it_stat_cpu_times else 0
+            it_cpu_idle  = 100 * it_stat_idle    / it_stat_cpu_times if it_stat_cpu_times else 0
+            it_cpu_steal = 100 * it_stat_steal   / it_stat_cpu_times if it_stat_cpu_times else 0
+            it_cpu_guest = 100 * it_stat_guest   / it_stat_cpu_times if it_stat_cpu_times else 0
+            it_cpu_util  = 100 * (it_stat_cpu_times - it_stat_idle - it_stat_iowait - it_stat_steal) / it_stat_cpu_times if it_stat_cpu_times else 0
 
             if not opts.live:
                 agregates[it_device+'_cpu_user'].append(it_cpu_user)
