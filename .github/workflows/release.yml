@@ -1,0 +1,76 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - '[0-9]+.*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve version
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="$(grep '^Version:' debian/control | awk '{print $2}' | cut -d- -f1)-dev"
+          fi
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+          # the tag is the single source of truth for package versions
+          sed -i "s/^Version:.*/Version: ${VERSION}-1/" debian/control
+          sed -i "s/^Version:.*/Version: ${VERSION}/"     spec/ssar.spec
+          echo "building ssar ${VERSION}"
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ zlib1g-dev rpm
+
+      - name: Build rpm package
+        run: |
+          mkdir -p ~/rpmbuild/SOURCES ~/rpmbuild/SPECS artifacts
+          tar --exclude-vcs -czf ~/rpmbuild/SOURCES/ssar-${VERSION}.tar.gz \
+              -C .. "${GITHUB_REPOSITORY##*/}"
+          cp spec/ssar.spec ~/rpmbuild/SPECS/
+          # --nodeps: BuildRequires are satisfied through apt, not the rpm database
+          rpmbuild -bb --nodeps ~/rpmbuild/SPECS/ssar.spec
+          cp ~/rpmbuild/RPMS/x86_64/ssar-*.rpm artifacts/
+
+      - name: Build deb package
+        run: |
+          bash debian/build.sh
+          cp debian/ssar_*_amd64.deb artifacts/
+
+      - name: Generate checksums
+        run: |
+          cd artifacts
+          sha256sum * > checksums.txt
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ssar-${{ env.VERSION }}
+          path: artifacts/*
+
+      - name: Create release and upload artifacts
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" artifacts/* --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" \
+              --title "ssar ${VERSION}" \
+              --generate-notes \
+              artifacts/*
+          fi
