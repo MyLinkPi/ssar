@@ -29,7 +29,7 @@ if [ $? -ne 0 ]; then
     exit $?
 fi
 main_dir=$(tar -tzvf $RPM_SOURCE_DIR/%{name}-%{version}.tar.gz| head -n 1 | awk '{print $NF}' | awk -F/ '{print $1}')
-if [ "${main_dir}" == %{name} ];then
+if [ "${main_dir}" = %{name} ];then
     mv %{name} %{name}-%{version}
 fi
 cd %{name}-%{version}
